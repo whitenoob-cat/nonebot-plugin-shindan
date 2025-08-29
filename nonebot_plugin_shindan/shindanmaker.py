@@ -61,7 +61,9 @@ async def get_shindan_title(id: int) -> str:
 
 
 async def make_shindan(id: int, name: str, mode="image") -> Union[str, bytes]:
-    # url = f"https://shindanmaker.com/{id}"
+    ping,url = await try_browse_pages()
+    if ping == -1:
+        raise RuntimeError("所有站点均无法访问，请稍后再试")
     seed = time.strftime("%y%m%d", time.localtime())
     async with get_new_page() as page:
         await page.set_extra_http_headers(headers=headers)
