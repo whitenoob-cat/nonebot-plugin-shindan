@@ -24,7 +24,7 @@ headers = {"user-agent": USER_AGENT}
 if shindan_config.shindanmaker_cookie:
     headers["cookie"] = shindan_config.shindanmaker_cookie
 
-async def try_browse_pages(timeout:int=3) -> tuple[int,str]:
+async def try_browse_pages(timeout:int=3) -> str:
     _page_list = ["","cn.","en.","kr.","jp."]
     _time_spend = {}
     async with get_new_page() as page:
@@ -38,10 +38,10 @@ async def try_browse_pages(timeout:int=3) -> tuple[int,str]:
             except Exception:
                 _timestamp = "Timeout"
     _least_time_spend = min(_time_spend,default="-1")
-    if _least_time_spend == "Timeout":
-        return int(_least_time_spend),"Timeout"
+    if _least_time_spend == "-1":
+        return "Timeout"
     else:
-        return int(_least_time_spend),f"https://{_least_time_spend}shindanmaker.com"
+        return f"https://{_least_time_spend}shindanmaker.com"
 
 
 async def download_image(url: str) -> bytes:
@@ -51,8 +51,8 @@ async def download_image(url: str) -> bytes:
 
 
 async def get_shindan_title(id: int) -> str:
-    ping,url = await try_browse_pages()
-    if ping == -1:
+    url = await try_browse_pages()
+    if url == "Timeout":
         raise RuntimeError("所有站点均无法访问，请稍后再试")
     async with get_new_page() as page:
         await page.set_extra_http_headers(headers=headers)
@@ -61,8 +61,8 @@ async def get_shindan_title(id: int) -> str:
 
 
 async def make_shindan(id: int, name: str, mode="image") -> Union[str, bytes]:
-    ping,url = await try_browse_pages()
-    if ping == -1:
+    url = await try_browse_pages()
+    if url == "Timeout":
         raise RuntimeError("所有站点均无法访问，请稍后再试")
     seed = time.strftime("%y%m%d", time.localtime())
     async with get_new_page() as page:
