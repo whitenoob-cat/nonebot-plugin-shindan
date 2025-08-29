@@ -162,6 +162,9 @@ def shindan_handler(shindan: ShindanConfig) -> T_Handler:
 
         try:
             res = await make_shindan(shindan.id, name, shindan.mode)
+        except RuntimeError as e:
+            logger.error(traceback.format_exc())
+            await matcher.finish(str(e))
         except Exception:
             logger.warning(traceback.format_exc())
             await matcher.finish("出错了，请稍后再试")
